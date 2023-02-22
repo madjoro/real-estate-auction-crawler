@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from selenium import webdriver
+#pip install webdriver-manager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,7 +10,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import configparser
 import os
-import pdf_filter
+import src.pdf_filter as pdf_filter
+import datetime
+import logging
 
 def crawl_and_download():
     options = webdriver.ChromeOptions()
@@ -23,7 +26,12 @@ def crawl_and_download():
 
     prefs = {'download.default_directory' : dir_path}
     options.add_experimental_option('prefs', prefs)
-
+    
+    #for raspberry pi server config:
+    #sudo apt purge --remove chromium-browser -y
+    #sudo apt autoremove && sudo apt autoclean -y
+    #sudo apt install chromium-chromedriver
+    #driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver', options=options)
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
     url = "https://www.ajpes.si/eObjave/default.asp?s=51"
@@ -41,6 +49,10 @@ def crawl_and_download():
     select = Select(driver.find_element(By.ID, "id_skupinaPodVrsta"))
     select.select_by_visible_text("razpis dražbe / vabila k dajanju ponudb")
 
+    #server config - automatic date
+    #today = datetime.date.today().strftime("%d.%m.%Y") #d2
+    #yesterday = today - datetime.timedelta(days = 1).strftime("%d.%m.%Y") #d1
+    
     d1 = config.get('date', 'd1')
     d2 = config.get('date', 'd2')
 
@@ -111,6 +123,9 @@ def crawl_and_download():
     #driver.quit()
 
 if __name__ == '__main__':
+    logging.basicConfig(filename = 'file.log',
+        level = logging.DEBUG,
+        format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s')
     crawl_and_download()
 
     #filter all downloaded pdfs by specific keywords
